@@ -27,17 +27,30 @@ or any parent directory of the diagrams you are editing.
 
 ## Using Templates
 
-If a template matches a selected diagram element, the template chooser will be shown in the properties panel.
+If a template matches a selected diagram element, the template catalog button will be shown in the properties panel.
 
 ![Template Chooser](./chooser.png)
 
-Assigning a template will store it via the `camunda:modelerTemplate` property on the selected element:
+Clicking the `Catalog` button will bring up a modal menu allowing to browse and search available templates for the selected element.
+
+![Modal Menu](./modal.png)
+
+Applying a template will store it via the `camunda:modelerTemplate` property on the selected element:
 
 ```xml
 <bpmn:serviceTask id="MailTask" camunda:modelerTemplate="com.mycompany.MailTask" />
 ```
 
-It will also setup custom fields on the diagram element and make these available to the user for inspection and editing.
+It will also setup custom fields on the diagram element and make these available to the user for inspection and editing. Properties which were not configured in the element template using custom fields, will not be available for editing for the user.
+
+To remove an applied template from an element, either the *Unlink* or *Remove* function can be used:
+
+* *Remove*: Remove the element template from the `camunda:modelerTemplate` property and also reset all properties of the respective element.
+* *Unlink*: Remove the element template from the `camunda:modelerTemplate` property but keep the properties which were set.
+
+![Unlink or Remove](./unlink-remove.png)
+
+If a template is applied to an element but the respective template cannot be found on the system, the editing of the element will be disabled. Either *removing* the template for the element or adding the element template config will enable the editing again.
 
 
 ## Defining Templates
@@ -69,7 +82,6 @@ As seen in the code snippet a template consist of a number of important componen
 * `id`: Unique id of the template
 * `appliesTo`: List of BPMN types the template can be assigned to
 * `properties`: List of properties that are defined on the template
-* `entriesVisible`: Visibility customizer for default properties panel entries
 
 
 ### Defining Template Properties
@@ -171,12 +183,14 @@ As seen in the example the important attributes in a property definition are:
 * `type`: Defining the visual appearance in the properties panel (may be any of `String`, `Text`, `Boolean`, `Dropdown` or `Hidden`)
 * `value`: An optional default value to be used if the property to be bound is not yet set
 * `binding`: Specifying how the property is mapped to BPMN or Camunda extension elements and attributes (may be any of `property`, `camunda:property`, `camunda:inputParameter`, `camunda:outputParameter`, `camunda:in`, `camunda:out`, `camunda:executionListener`, `camunda:field`)
-* `constraints`: A list of editing constraints to apply to the template
+* `constraints`: A list of editing constraints to apply to the template (note that this configuration only works if a custom `type` is configured)
 
 
 #### Types
 
 The input types `String`, `Text`, `Boolean`, `Dropdown` and `Hidden` are available. As seen above `String` maps to a single-line input, `Text` maps to a multi-line input.
+
+If `type` is omitted the default UI component will be rendered for the respective binding. This behavior is currently only supported for `camunda:inputParameter` and `camunda:outputParameter`.
 
 
 ###### Boolean / Checkbox Type
@@ -212,6 +226,12 @@ The `Dropdown` type allows users to select from a number of pre-defined options 
 The resulting properties panel control looks like this:
 
 ![properties panel drop down](field-dropdown.png)
+
+###### Omitted Type
+
+By omitting the `type` configuration the default UI component will be rendered for the respective binding. This behavior is currently only supported for `camunda:inputParameter` and `camunda:outputParameter`:
+
+![default-rendering](./unlink-remove.png)
 
 
 #### Bindings
@@ -347,6 +367,8 @@ Custom Fields may have a number of constraints associated with them:
 * `maxLength`: Maximal length for the input
 * `pattern`: Regular expression to match the input against
 
+Note that the `constraints` configuration option only works if a custom `type` is configured and therefore a custom field will be rendered.
+
 
 ##### Regular Expression
 
@@ -369,11 +391,6 @@ Together with the `pattern` constraint, you may define your custom error message
     }
   ]
 ```
-
-
-<!-- ### Controlling Default Entry Visibility -->
-
-<!-- _TODO_ -->
 
 
 ## Default Templates
@@ -416,9 +433,12 @@ Currently, element templates may be used on the following BPMN elements:
 * `bpmn:Activity` (including tasks, service tasks, and others)
 * `bpmn:SequenceFlow` (for maintaining `condition`)
 * `bpmn:Process`
+* `bpmn:Event`
 
 
 ## Learn more
+
+Use the [Camunda Cloud Connect plugin](https://docs.camunda.org/cawemo/latest/technical-guide/integrations/modeler/) to integrate the Camunda Modeler with [Cawemo](https://cawemo.com/) and retrieve templates from a Cawemo catalog project.
 
 Try playing around with custom elements and some [example templates](https://github.com/camunda/camunda-modeler/blob/master/resources/element-templates/samples.json).
 
